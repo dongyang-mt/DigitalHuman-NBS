@@ -31,6 +31,49 @@ We provide a pretrained model that is dedicated for biped characters. Download a
 
 ~~~bash
 python demo.py --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/maynard.obj
+
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_8333_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/8333_ori.obj
+
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_8210_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/8210_ori.obj
+
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_9477_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/9477_ori.obj
+
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smith_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smith_ori.obj
+
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smpl_alvin --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smpl_alvin.obj
+
+
+
+(rignet) dongyang@work:/opt/data/dongyang/code/neural-blend-shapes$ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_8210_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/8210_ori.obj
+Traceback (most recent call last):
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 160, in <module>
+    main()
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 144, in main
+    env_model, res_model = load_model(device, model_args, topo_loader, args.model_path, args.envelope_only)
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 55, in load_model
+    geo, att, gen = create_envelope_model(device, model_args, topo_loader, is_train=False, parents=parent_smpl)
+  File "/opt/data/dongyang/code/neural-blend-shapes/architecture/__init__.py", line 31, in create_envelope_model
+    geometry_branch = MeshReprConv(device, is_train=is_train, save_path=pjoin(save_path, 'geo/'),
+  File "/opt/data/dongyang/code/neural-blend-shapes/models/networks.py", line 53, in __init__
+    super(MeshReprConv, self).__init__(device, is_train, save_path,
+  File "/opt/data/dongyang/code/neural-blend-shapes/models/meshcnn_base.py", line 56, in __init__
+    val.extend([1 / len(neighbors)] * len(neighbors))
+ZeroDivisionError: division by zero
+(rignet) dongyang@work:/opt/data/dongyang/code/neural-blend-shapes$ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smith_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smith_ori.obj
+Traceback (most recent call last):
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 160, in <module>
+    main()
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 142, in main
+    mesh = prepare_obj(args.obj_path, topo_loader)
+  File "/opt/data/dongyang/code/neural-blend-shapes/demo.py", line 101, in prepare_obj
+    mesh = StaticMeshes([filename], topo_loader)
+  File "/opt/data/dongyang/code/neural-blend-shapes/dataset/mesh_dataset.py", line 99, in __init__
+    self.topo_id.append(topo_loader.load_from_obj(filename))
+  File "/opt/data/dongyang/code/neural-blend-shapes/dataset/topology_loader.py", line 41, in load_from_obj
+    bmesh.load(obj_name)
+  File "/opt/data/dongyang/code/neural-blend-shapes/mesh/simple_mesh.py", line 98, in load
+    assert len(face_vertex_ids) == 3
+AssertionError
 ~~~
 
 The nice greeting animation showed above will be saved in `demo/obj` as obj files. In addition, the generated skeleton will be saved as `demo/skeleton.bvh` and the skinning weight matrix will be saved as `demo/weight.npy`. If you need the bvh file animated, you may specify `--animated_bvh=1`.
@@ -48,6 +91,14 @@ Now you can choose to output the animation as a single fbx file instead of a seq
 python demo.py --animated_bvh=1 --obj_output=0
 cd blender_scripts
 blender -b -P nbs_fbx_output.py -- --input ../demo --output ../demo/output.fbx
+
+blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_8333_ori --output ../demo_greeting_8333_ori/output.fbx
+
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_9477_ori --output ../demo_greeting_9477_ori/output.fbx && cd ../
+
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_smpl_alvin --output ../demo_greeting_smpl_alvin/output.fbx && cd ../
+
+
 ~~~
 
 Note that you need to install Blender (>=2.80) to generate the fbx file. You may explore more options on the generated fbx file in the source code.
@@ -64,6 +115,21 @@ To reconstruct the quantitative result with the pretrained model, you need to do
 
 ~~~bash
 python evaluation.py
+
+(icon) dongyang@work:/opt/data/dongyang/code/neural-blend-shapes$ python evaluation.py --device=cuda:1
+Preparing topology augmentation...
+100%|█████████████████████████████████████████████████████████████████████████████████| 10/10 [00:02<00:00,  3.87it/s]
+Evaluating model...
+100%|█████████████████████████████████████████████████████████████████████████████████| 10/10 [00:03<00:00,  2.72it/s]
+Aggregating error...
+100%|█████████████████████████████████████████████████████████████████████████████████| 10/10 [00:13<00:00,  1.39s/it]
+Skinning Weight L1 = 0.0025636
+Vertex Mean Loss L2 = 0.0000061
+Vertex Max Loss L2 = 0.0005592
+Envelope Mean Loss L2 = 0.0000115
+CD-J2J = 0.0000119
+CD-J2B = 0.0000069
+CD-B2B = 0.0000040
 ~~~
 
 
@@ -79,6 +145,7 @@ The training process contains tow stages, each stage corresponding to one branch
 
 ~~~bash
 python train.py --envelope=1 --save_path=[path to save the model] --device=[cpu/cuda:0/cuda:1/...]
+python train.py --envelope=1 --save_path=./pre_trained_20221223 --device=cuda:0
 ~~~
 
 For the second stage, it is strongly recommended to use a pre-process to extract the blend shapes basis then start the training for much better efficiency by
@@ -109,6 +176,9 @@ We provide a simple light and camera setting in `eval_constant/simple_scene.blen
 ~~~bash
 cd blender_script
 blender ../eval_constant/simple_scene.blend -P render_mesh.py -b
+
+
+blender ../eval_constant/simple_scene.blend -P render_mesh.py --image_path=../demo_greeting_smpl_alvin/images --video_path=--video_path/video.mov --obj_path=../demo_greeting_smpl_alvin/obj -b 
 ~~~
 
 The rendered per-frame image will be saved in `demo/images` and composited video will be saved as `demo/video.mov`. 

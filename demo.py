@@ -19,14 +19,14 @@ from tqdm import tqdm
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default='cpu')
-    parser.add_argument('--pose_file', type=str, default='./eval_constant/sequences/house-dance.npy')
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--pose_file', type=str, default='./eval_constant/sequences/greeting.npy')
     parser.add_argument('--model_path', type=str, default='./pre_trained')
-    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/artist-2.obj')
+    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/maynard.obj')
     parser.add_argument('--result_path', type=str, default='./demo')
     parser.add_argument('--normalize', type=int, default=0)
-    parser.add_argument('--envelope_only', type=int, default=0)
-    parser.add_argument('--animated_bvh', type=int, default=0)
+    parser.add_argument('--envelope_only', type=int, default=1)
+    parser.add_argument('--animated_bvh', type=int, default=1)
     parser.add_argument('--obj_output', type=int, default=1)
     return parser
 
