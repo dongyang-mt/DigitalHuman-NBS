@@ -42,7 +42,11 @@ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smi
 
 python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smpl_alvin --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smpl_alvin.obj
 
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smpl --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smpl.obj
 
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smpl --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smpl.obj
+
+/home/dongyang/code/neural-blend-shapes/eval_constant/meshes/smpl.obj
 
 (rignet) dongyang@work:/opt/data/dongyang/code/neural-blend-shapes$ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_8210_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/8210_ori.obj
 Traceback (most recent call last):
@@ -97,6 +101,10 @@ blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_8333_ori --output ..
 cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_9477_ori --output ../demo_greeting_9477_ori/output.fbx && cd ../
 
 cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_smpl_alvin --output ../demo_greeting_smpl_alvin/output.fbx && cd ../
+
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_smpl --output ../demo_greeting_smpl/output.fbx && cd ../
+
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_smpl_female --output ../demo_greeting_smpl_female/output.fbx && cd ../
 
 
 ~~~

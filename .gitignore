@@ -1,4 +1,8 @@
 # Byte-compiled / optimized / DLL files
+demo*
+dataset*
+training_data.tar.bz2
+test_data.tar.bz2
 pre_trained.tar.bz2
 __pycache__/
 *.py[cod]
