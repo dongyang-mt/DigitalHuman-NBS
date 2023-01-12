@@ -175,6 +175,8 @@ class MLP(nn.Module):
         self.optimizer = optimizer(self.parameters(), lr=lr)
 
     def save_model(self, epoch=None):
+        import logging
+        logging.warning("save_model:" + pjoin(self.save_path, 'model/%05d.pt self.save_freq%d' % (epoch, self.save_freq)))
         if epoch is None:
             epoch = self.epoch_count
 

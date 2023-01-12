@@ -79,7 +79,6 @@ def main():
 
     topo_loader, dataset_smpl, dataset_garment, begin_aug_topo, len_topo = prepare_dataset(device, args)
     envelope_model, residual_model = create_model(device, args, topo_loader)
-
     if args.envelope:
         del residual_model
         model = envelope_model
@@ -101,13 +100,14 @@ def main():
     it_cnt = 0
 
     for epoch in loop:
-        for _ in range(10):  # We simply take 10 iterations as an epoch
+        for _ in range(1):  # We simply take 10 iterations as an epoch
             model.zero_grad()
 
             dataset = dataset_smpl if it_cnt % 2 == 0 else dataset_garment
             topo_id = begin_aug_topo + random.randint(0, len_topo - 1)
 
             if args.envelope:
+                # pose: [batch_size, 72]
                 pose = generate_pose(batch_size, device)
                 pose_ee = generate_pose(batch_size, device, uniform=args.ee_uniform, factor=args.ee_factor, ee=dataset.end_effectors(args.ee_order))
                 # Examples for capture end_effector deformation
@@ -131,9 +131,31 @@ def main():
             model.optim_step()
             it_cnt += 1
 
-        if epoch % 50 == 0:
+        # if epoch % 5 == 0:
+        if True:
             model.save_model()
         model.epoch()
+
+
+def translate():
+    import open3d as o3d
+    import numpy as np
+    import copy
+    mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+    mesh_tx = copy.deepcopy(mesh).translate((1.3, 0, 0))
+    mesh_ty = copy.deepcopy(mesh).translate((0, 1.3, 0))
+    print('Displaying original and translated geometries ...')
+    o3d.visualization.draw([{
+        "name": "Original Geometry",
+        "geometry": mesh
+    }, {
+        "name": "Translated (in X) Geometry",
+        "geometry": mesh_tx
+    }, {
+        "name": "Translated (in Y) Geometry",
+        "geometry": mesh_ty
+    }],
+                           show_ui=True)
 
 
 if __name__ == '__main__':

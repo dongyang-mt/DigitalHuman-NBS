@@ -25,7 +25,7 @@ def main():
     test_shape = torch.tensor(np.load('./eval_constant/test_shape.npy'), device=device)
 
     topo_loader = TopologyLoader(device=device, debug=False)
-    smpl_topo_begin, len_topo_smpl = topo_loader.load_smpl_group('./dataset/Meshes/SMPL/topology/',
+    smpl_topo_begin, len_topo_smpl = topo_loader.load_smpl_group('./dataset_test/Meshes/SMPL/topology/',
                                                                  is_train=False)
 
     env_model, res_model = load_model(device, model_args, topo_loader, args.model_path, envelope_only=False)

@@ -54,11 +54,12 @@ class GenerateModelBase:
         self.epoch_cnt += 1
 
 
-def attention_pooling(tensor, att):
+def attention_pooling(deep_v, att):
     """
     Corresponding to the Eq(1) in the paper.
     """
-    latent = torch.matmul(att.transpose(-2, -1), tensor)
+    att_t = att.transpose(-2, -1)
+    latent = torch.matmul(att.transpose(-2, -1), deep_v)
     coff = att.sum(dim=1).unsqueeze(-1)
     coff[coff < 1e-10] = 1
     latent = latent / coff
@@ -99,16 +100,21 @@ class EnvelopeGenerate(GenerateModelBase):
         self.t_pose_mapped = self.bb.normalize(self.t_pose_mapped)
 
         # Generate skinning weight (attention)
+        # self.att [batch_size, F, J]
+        # self.att_vert [batch_size, V, J]
         self.att, self.att_vert = self.forward_att(self.t_pose_mapped)
 
+        # self.deep_v [batch_size, F, 512]
         self.deep_v = self.forward_geometry(self.t_pose_mapped)
 
         # Deal with skeleton generation
-        deep_s = attention_pooling(self.deep_v, self.att)
-        deep_s = deep_s.reshape(deep_s.shape[0], -1)
-        skeleton = self.models['gen'](deep_s)
+        # self.deep_o [batch_size, 512*24]
+        deep_o = attention_pooling(self.deep_v, self.att)
+        deep_o = deep_o.reshape(deep_o.shape[0], -1)
+        # skeleton [batch_size, 24, 3]
+        skeleton = self.models['gen'](deep_o)
 
-        skeleton = skeleton.reshape(deep_s.shape[0], -1, 3)
+        skeleton = skeleton.reshape(deep_o.shape[0], -1, 3)
 
         self.skeleton = skeleton = self.bb.denormalize_offset(skeleton)
         self.t_pose_mapped = self.bb.denormalize(self.t_pose_mapped)

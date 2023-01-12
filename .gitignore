@@ -1,4 +1,5 @@
 # Byte-compiled / optimized / DLL files
+pre_trained.tar.bz2
 __pycache__/
 *.py[cod]
 *$py.class
