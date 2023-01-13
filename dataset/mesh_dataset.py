@@ -130,6 +130,23 @@ class SMPLDataset(BaseSkinnedDataset):
     def forward(self, pose, pose2=None, shape=None, requires_skeleton=False):
         if shape is None:
             shape = generate_shape(pose.shape[0], device=self.device)
+        a_pose_rot = torch.zeros_like(pose)
+        # a_pose_rot = a_pose_rot[:,15*3+2] = 10
+        # a_pose_rot = a_pose_rot[:,16*3+2] = 10
+        import scipy.spatial.transform.rotation as R
+        euler_angle = [0, 0, -45]
+        axis_angle = R.Rotation.from_euler('xyz', euler_angle, degrees=True).as_rotvec()
+        LEFT_SHOULDER, RIGHT_SHOULDER = 16, 17
+        # left = torch.from_numpy(np.repeat(axis_angle, a_pose_rot.shape[0], axis=1))
+        a_pose_rot[:, LEFT_SHOULDER*3:LEFT_SHOULDER*3+3] = torch.from_numpy(axis_angle)
+        euler_angle = [0, 0, 45]
+        axis_angle = R.Rotation.from_euler('xyz', euler_angle, degrees=True).as_rotvec()
+        a_pose_rot[:,RIGHT_SHOULDER*3:RIGHT_SHOULDER*3+3] = torch.from_numpy(axis_angle)
+
+        a_pose = self.smpl_layer.forward(a_pose_rot, shape)[0]
+        import open3d_utils
+        for i in range(pose.shape[0]):
+            open3d_utils.write_numpy_torch_verts_faces_to_mesh(a_pose[i].numpy(), self.smpl_layer.faces, "temp_a_pose/%03d.obj"%i)
         t_pose = self.smpl_layer.forward(torch.zeros_like(pose), shape)[0]
         deformed = self.smpl_layer.forward(pose, shape)[0]
         offsets = self.smpl_layer.get_offset(shape)
