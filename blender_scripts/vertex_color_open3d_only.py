@@ -131,7 +131,9 @@ if __name__ == '__main__':
     N=6890
     # color3 = np.repeat([[1,0,0]], repeats=[N],axis=1)
     color3 = np.zeros_like(color)
-    color3[:,2]=1
+    color3[0:1000,2]=1
+    color3[1000:5000,1]=1
+    color3 = color
     # color3[0:2000,2]=1
     # color3[2000:,1]=1
     print("color3.shape", color3.shape)
@@ -153,6 +155,7 @@ if __name__ == '__main__':
     print(color3 == mesh_colors)
     print((color3 == mesh_colors).all())
     print("Displaying mesh made using numpy ...")
+    o3d.visualization.draw([mesh_np])
     # o3d.visualization.draw_geometries([mesh_np], mesh_show_wireframe=True)
 
     pcd = o3d.geometry.PointCloud()
