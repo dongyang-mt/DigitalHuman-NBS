@@ -76,9 +76,66 @@ def load_model(device, model_args, topo_loader, save_path_base, envelope_only, e
 
     return envelop_model, residual_model
 
+def save_nbs_model(verts, topo_id, pose, skinning_weight, skeleton, requires_lbs=False, args=None):
+    import open3d as o3d
+    import pickle
+    import chumpy
+    mesh = o3d.io.read_triangle_mesh(args.obj_path)
+    print(mesh)
+    model = {}
 
-def run_single_mesh(verts, topo_id, pose, env_model, res_model, requires_lbs=False):
+    model["v_template"] = np.asarray(mesh.vertices).astype(np.float32)
+    model["faces"] = np.asarray(mesh.triangles).astype(np.int32)
+    model["f"] = np.asarray(mesh.triangles)
+    smpl_path = "/home/dongyang/code/body-model-visualizer/data/body_models/smpl/SMPL_NEUTRAL.pkl"
+    with open(smpl_path, 'rb') as smpl_file:
+        smpl_model = pickle.load(smpl_file, encoding='latin1')
+    model["kintree_table"] = smpl_model["kintree_table"].astype(np.int32)
+    model["kintree_table"][0, 0] = -1
+    model["skeleton"] = skeleton.cpu().numpy()
+    model["weights"] = skinning_weight.cpu().numpy()
+    model["J_regressor"] = np.zeros((model["weights"].shape[1], model["weights"].shape[0]))     # J_regressor : torch.tensor JxV
+
+    np.savez('nbs_model.npz', **model)
+
+def load_nbs_model(model_path):
+    model = np.load(model_path)
+    return model
+
+def inference_nbs_model(model_path, pose=None):
+    pose = pose[[0]]
+    pose = torch.zeros((1,72), device=pose.device)
+    import scipy.spatial.transform.rotation as R
+    euler_angle = [-90, 0, 0]
+    pose[:, 1*3:2*3] = torch.from_numpy(R.Rotation.from_euler('xyz', euler_angle, degrees=True).as_rotvec()).to(pose.device)
+    # pose[:, 14*3:15*3] = torch.from_numpy(R.Rotation.from_euler('xyz', euler_angle, degrees=True).as_rotvec()).to(pose.device)
+
+    np_array = np.load(model_path)
+    model = {}
+    for name in np_array.files:
+        model[name] = torch.from_numpy(np_array[name]).to(pose.device)
+    parent_smpl = np_array["kintree_table"][0]
+    parent_smpl[0] = -1
+    fk = ForwardKinematics(parents=parent_smpl)
+    local_mat = aa2mat(pose.reshape(pose.shape[0], -1, 3))
+    skinning_weight = model['weights']
+    skeleton = model['skeleton']
+    verts = model["v_template"]
+    global_mat = fk.forward(local_mat, skeleton.unsqueeze(0))
+    vs = deform_with_offset(verts, skinning_weight, global_mat)
+    import open3d as o3d
+    vertices = o3d.utility.Vector3dVector(vs[0].cpu().numpy())
+    triangles = o3d.utility.Vector3iVector(np_array["faces"])
+    mesh = o3d.geometry.TriangleMesh(vertices, triangles)
+    o3d.io.write_triangle_mesh("nbs_model.obj", mesh)
+    o3d.visualization.draw([mesh])
+    return model
+
+
+def run_single_mesh(verts, topo_id, pose, env_model, res_model, requires_lbs=False, args=None):
     skinning_weight, skeleton = eval_envelop(verts, topo_id, env_model)
+    save_nbs_model(verts, topo_id, pose, skinning_weight, skeleton, requires_lbs=False, args=args)
+    inference_nbs_model('nbs_model.npz', pose)
     if res_model is not None:
         offset, basis, coff = eval_residual(verts, topo_id, pose, res_model)
     else:
@@ -121,7 +178,7 @@ def write_back(prefix, skeleton, skinning_weight, verts, faces, original_path, r
 
     if os.path.exists(pjoin(prefix, 'obj')):
         os.system(f"rm -r {pjoin(prefix, 'obj/*')}")
-    if verts is not None:
+    if False and verts is not None:
         print('Writing back...')
         for i in tqdm(range(verts.shape[0])):
             write_obj(pjoin(prefix, 'obj/%05d.obj' % i), verts[i], faces)
@@ -144,7 +201,7 @@ def main():
     env_model, res_model = load_model(device, model_args, topo_loader, args.model_path, args.envelope_only)
 
     t_pose, topo_id = mesh[0]
-    skinning_weight, skeleton, vs, basis, coff = run_single_mesh(t_pose, topo_id, test_pose, env_model, res_model)
+    skinning_weight, skeleton, vs, basis, coff = run_single_mesh(t_pose, topo_id, test_pose, env_model, res_model, args=args)
 
     faces = topo_loader.faces[topo_id]
 
