@@ -22,12 +22,12 @@ def get_parser():
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--pose_file', type=str, default='./eval_constant/sequences/greeting.npy')
     parser.add_argument('--model_path', type=str, default='./pre_trained')
-    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/maynard.obj')
+    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/smpl.obj')
     parser.add_argument('--result_path', type=str, default='./demo')
     parser.add_argument('--normalize', type=int, default=0)
     parser.add_argument('--envelope_only', type=int, default=1)
     parser.add_argument('--animated_bvh', type=int, default=1)
-    parser.add_argument('--obj_output', type=int, default=1)
+    parser.add_argument('--obj_output', type=int, default=0)
     return parser
 
 
@@ -138,7 +138,7 @@ def main():
 
     test_pose, test_loc = load_test_anim(args.pose_file, device)
 
-    topo_loader = TopologyLoader(device=device, debug=False)
+    topo_loader = TopologyLoader(device=device, debug=True)
     mesh = prepare_obj(args.obj_path, topo_loader)
 
     env_model, res_model = load_model(device, model_args, topo_loader, args.model_path, args.envelope_only)

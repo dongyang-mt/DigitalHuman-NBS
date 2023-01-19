@@ -46,6 +46,10 @@ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smp
 
 python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_smpl --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/smpl.obj
 
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_artist-1 --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/artist-1.obj
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_artist-2 --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/artist-2.obj
+python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_girl --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/girl.obj
+
 /home/dongyang/code/neural-blend-shapes/eval_constant/meshes/smpl.obj
 
 (rignet) dongyang@work:/opt/data/dongyang/code/neural-blend-shapes$ python demo.py --animated_bvh=1 --obj_output=1 --result_path=./demo_greeting_8210_ori --pose_file=./eval_constant/sequences/greeting.npy --obj_path=./eval_constant/meshes/8210_ori.obj
@@ -106,7 +110,11 @@ cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greetin
 
 cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_smpl_female --output ../demo_greeting_smpl_female/output.fbx && cd ../
 
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_artist-1 --output ../demo_greeting_artist-1/output.fbx && cd ../
 
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_artist-2 --output ../demo_greeting_artist-2/output.fbx && cd ../
+
+cd blender_scripts && blender -b -P nbs_fbx_output.py -- --input ../demo_greeting_girl --output ../demo_greeting_girl/output.fbx && cd ../
 ~~~
 
 Note that you need to install Blender (>=2.80) to generate the fbx file. You may explore more options on the generated fbx file in the source code.
@@ -196,7 +204,7 @@ The rendered per-frame image will be saved in `demo/images` and composited video
 Visualizing the skinning weight is a good sanity check to see whether the model works as expected. We provide a script using Blender's built-in ShaderNodeVertexColor to visualize the skinning weight. Simply run
 
 ~~~bash
-cd blender_script
+cd blender_scripts
 blender -P vertex_color.py
 ~~~
 
