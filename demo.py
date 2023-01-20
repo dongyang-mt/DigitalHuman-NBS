@@ -22,7 +22,7 @@ def get_parser():
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--pose_file', type=str, default='./eval_constant/sequences/greeting.npy')
     parser.add_argument('--model_path', type=str, default='./pre_trained')
-    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/smpl.obj')
+    parser.add_argument('--obj_path', type=str, default='./eval_constant/meshes/smpl_std.obj')
     parser.add_argument('--result_path', type=str, default='./demo')
     parser.add_argument('--normalize', type=int, default=0)
     parser.add_argument('--envelope_only', type=int, default=1)
@@ -96,7 +96,7 @@ def save_nbs_model(verts, topo_id, pose, skinning_weight, skeleton, requires_lbs
     model["weights"] = skinning_weight.cpu().numpy()
     model["J_regressor"] = np.zeros((model["weights"].shape[1], model["weights"].shape[0]))     # J_regressor : torch.tensor JxV
 
-    np.savez('nbs_model.npz', **model)
+    np.savez('NBS_NEUTRAL.npz', **model)
 
 def load_nbs_model(model_path):
     model = np.load(model_path)
@@ -127,15 +127,15 @@ def inference_nbs_model(model_path, pose=None):
     vertices = o3d.utility.Vector3dVector(vs[0].cpu().numpy())
     triangles = o3d.utility.Vector3iVector(np_array["faces"])
     mesh = o3d.geometry.TriangleMesh(vertices, triangles)
-    o3d.io.write_triangle_mesh("nbs_model.obj", mesh)
+    o3d.io.write_triangle_mesh("NBS_NEUTRAL.obj", mesh)
     o3d.visualization.draw([mesh])
     return model
 
 
 def run_single_mesh(verts, topo_id, pose, env_model, res_model, requires_lbs=False, args=None):
     skinning_weight, skeleton = eval_envelop(verts, topo_id, env_model)
-    save_nbs_model(verts, topo_id, pose, skinning_weight, skeleton, requires_lbs=False, args=args)
-    inference_nbs_model('nbs_model.npz', pose)
+    # save_nbs_model(verts, topo_id, pose, skinning_weight, skeleton, requires_lbs=False, args=args)
+    # inference_nbs_model('NBS_NEUTRAL.npz', pose)
     if res_model is not None:
         offset, basis, coff = eval_residual(verts, topo_id, pose, res_model)
     else:
