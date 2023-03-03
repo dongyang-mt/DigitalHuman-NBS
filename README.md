@@ -64,6 +64,37 @@ To reconstruct the quantitative result with the pretrained model, you need to do
 
 ~~~bash
 python evaluation.py
+
+python evaluation.py 
+Preparing topology augmentation...
+100%|████████████████████████████████████████████| 10/10 [00:02<00:00,  3.66it/s]
+Evaluating model...
+100%|████████████████████████████████████████████| 10/10 [00:13<00:00,  1.36s/it]
+Aggregating error...
+100%|████████████████████████████████████████████| 10/10 [00:04<00:00,  2.29it/s]
+Skinning Weight L1 = 0.0025611
+Vertex Mean Loss L2 = 0.0000111
+Vertex Max Loss L2 = 0.0016834
+Envelope Mean Loss L2 = 0.0000238
+CD-J2J = 0.0000117
+CD-J2B = 0.0000067
+CD-B2B = 0.0000039
+
+
+(neuralbs_no4) dongyang@work:./neural-blend-shapes.orignal$ python evaluation.py --model_path=./pre_trained_20230112/
+Preparing topology augmentation...
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:02<00:00,  3.60it/s]
+Evaluating model...
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:14<00:00,  1.48s/it]
+Aggregating error...
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:04<00:00,  2.31it/s]
+Skinning Weight L1 = 0.0117172
+Vertex Mean Loss L2 = 0.0000779
+Vertex Max Loss L2 = 0.0162603
+Envelope Mean Loss L2 = 0.0000826
+CD-J2J = 0.0106285
+CD-J2B = 0.0088597
+CD-B2B = 0.0127989
 ~~~
 
 
@@ -79,6 +110,8 @@ The training process contains tow stages, each stage corresponding to one branch
 
 ~~~bash
 python train.py --envelope=1 --save_path=[path to save the model] --device=[cpu/cuda:0/cuda:1/...]
+
+python train.py --envelope=1 --residual=0 --save_path=pre_trained_20230112 --device=cuda:7
 ~~~
 
 For the second stage, it is strongly recommended to use a pre-process to extract the blend shapes basis then start the training for much better efficiency by
@@ -86,6 +119,9 @@ For the second stage, it is strongly recommended to use a pre-process to extract
 ~~~bash
 python preprocess_bs.py --save_path=[same path as the first stage] --device=[computing device]
 python train.py --residual=1 --save_path=[same path as the first stage] --device=[computing device] --lr=1e-4
+
+python preprocess_bs.py --save_path=pre_trained_20230112 --device=cuda:7
+python train.py --envelope=0 --residual=1 --save_path=pre_trained_20230112 --device=cuda:7 --lr=1e-4
 ~~~
 
 ## Blender Visualization
